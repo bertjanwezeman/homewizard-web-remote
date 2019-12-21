@@ -456,3 +456,14 @@ if [ ! -z $GETOPTS_TEMPERATURE ] ; then
   fi
 fi
 
+Deur sensor uit kakusensors:
+bertjan@winterkoning:~/bin $ ./homewizard.sh -u
+bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur") | .status'`
+"no"
+bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur")'`
+{ "id": 2, "name": "Voordeur", "status": "no", "type": "contact", "favorite": "no", "timestamp": "19:36", "cameraid": null }
+bertjan@winterkoning:~/bin $ ./homewizard.sh -u
+bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur")'`
+{ "id": 2, "name": "Voordeur", "status": "yes", "type": "contact", "favorite": "no", "timestamp": "19:37", "cameraid": null }
+bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur") | .status'`
+"yes"
