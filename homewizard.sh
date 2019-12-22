@@ -53,6 +53,22 @@ fi
 echo ""
 }
 
+
+# ------------------------------------------------------------------------------
+getkakusensorsstate()
+# ------------------------------------------------------------------------------
+#
+# Description:  return the state of a kaku door sensor (on/off)
+#
+# Parameter  :  none
+#
+# Output     :  logging
+#
+{
+  update_cache_check
+  echo `cat $PROFILEDIR/homewizard.json | jq '.kakusensors | .[] | select(.name=='\"$1\"') | .status' | sed 's/no/closed/;s/yes/open/' `
+}
+
 # ------------------------------------------------------------------------------
 gethumidity()
 # ------------------------------------------------------------------------------
@@ -304,6 +320,7 @@ usage: $(basename $0) -d <switchdevice> -s <on/off>
 OPTIONS:
   -d    <device>
   -g    get status of a sensor/device, needs option -d too
+  -k    get status of a kaku door sensor, needs option -d too
   -h    get humidity of a sensor, needs option -d too
   -t    get temperature of a sensor, needs option -d too
   -p    needs options: keyword or number: 0,1,2,3 or ?
@@ -356,9 +373,12 @@ fi
 #
 # please keep letters in alphabetic order
 #
-while getopts ":d:ghp:s:tux" OPTION
+while getopts ":d:ghp:s:ktux" OPTION
 do
   case $OPTION in
+    k)
+      GETOPTS_GETKAKUSENSORS=1
+      ;;
     d)
       GETOPTS_DEVICE="$OPTARG"
       ;;
@@ -438,6 +458,15 @@ if [ ! -z $GETOPTS_GETSENSORS ] ; then
   fi
 fi
 
+if [ ! -z $GETOPTS_GETKAKUSENSORS ] ; then
+  if [ -z $GETOPTS_DEVICE ] ; then
+    echo -e "Option -k needs Option -d too"
+    exit 1
+  else
+    getkakusensorsstate $GETOPTS_DEVICE
+  fi
+fi
+
 if [ ! -z $GETOPTS_HUMIDITY ] ; then
   if [ -z $GETOPTS_DEVICE ] ; then
     echo -e "Option -h needs Option -d too"
@@ -455,15 +484,3 @@ if [ ! -z $GETOPTS_TEMPERATURE ] ; then
     gettemperature $GETOPTS_DEVICE
   fi
 fi
-
-Deur sensor uit kakusensors:
-bertjan@winterkoning:~/bin $ ./homewizard.sh -u
-bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur") | .status'`
-"no"
-bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur")'`
-{ "id": 2, "name": "Voordeur", "status": "no", "type": "contact", "favorite": "no", "timestamp": "19:36", "cameraid": null }
-bertjan@winterkoning:~/bin $ ./homewizard.sh -u
-bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur")'`
-{ "id": 2, "name": "Voordeur", "status": "yes", "type": "contact", "favorite": "no", "timestamp": "19:37", "cameraid": null }
-bertjan@winterkoning:~/bin $ echo `cat ~/.homewizard/homewizard.json | jq '.kakusensors | .[] | select(.name=="Voordeur") | .status'`
-"yes"
